@@ -68,4 +68,43 @@ class NewVisitorTest(LiveServerTestCase):
 
         # 他访问这个URL，发现他的待办事项列表还在
         # 他满意的离开了
+    
+    def test_multiple_users_can_start_lists_at_different_urls(self):
+        # 张三新建了一个待办事项清单
+        self.brower.get(self.live_server_url)
+        inputbox = self.brower.find_element(By.ID,'id_new_item')
+        inputbox.send_keys('Buy flowers')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy flowers')
+
+        
+        zhangsan_list_url = self.brower.current_url
+        self.assertRegex(zhangsan_list_url,'/lists/.+')
+        
+        
+        self.brower.quit()
+        self.brower = webdriver.Chrome()
+        
+
+        
+        self.brower.get(self.live_server_url)
+        page_text = self.brower.find_element(By.TAG_NAME,'body').text
+        self.assertNotIn('Buy flowers',page_text)
+        self.assertNotIn('Give a gift to lisi',page_text)
+
+        
+        inputbox = self.brower.find_element(By.ID,'id_new_item')
+        inputbox.send_keys('Buy milk')
+        inputbox.send_keys(Keys.ENTER)
+        self.wait_for_row_in_list_table('1: Buy milk')
+        
+        wangwu_list_url = self.brower.current_url
+        self.assertRegex(wangwu_list_url,'/lists/.+')
+        self.assertNotEqual(wangwu_list_url,zhangsan_list_url)
+        
+        # 这个页面还是没有张三的清单
+        page_text = self.brower.find_element(By.TAG_NAME,'body').text
+        self.assertNotIn('Buy flowers',page_text)
+        self.assertIn('Buy milk',page_text)
+
 
