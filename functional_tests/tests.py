@@ -4,10 +4,10 @@ import unittest
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 import time
-from django.test import LiveServerTestCase
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from selenium.common.exceptions import WebDriverException
 MAX_WAIT = 10
-class NewVisitorTest(LiveServerTestCase):
+class NewVisitorTest(StaticLiveServerTestCase):
     def setUp(self):
         self.brower = webdriver.Chrome()
     
@@ -122,8 +122,10 @@ class NewVisitorTest(LiveServerTestCase):
         # 他新建了一个待办事项清单，发现输入框还是完美的居中显示
         inputbox.send_keys('testing')
         inputbox.send_keys(Keys.ENTER)
+        
         self.wait_for_row_in_list_table('1: testing')
-        input = self.brower.find_element(By.ID,'id_new_item')
+        
+        inputbox = self.brower.find_element(By.ID,'id_new_item')
         self.assertAlmostEqual(
             inputbox.location['x'] + inputbox.size['width'] / 2,
             512,
